@@ -377,81 +377,42 @@ namespace PropPrint
         {
             int tw, th, tx, ty;
 
-
-
             int w = image.Width;
-
             int h = image.Height;
 
-
-
             //get the ratio of width / height
-
             double whRatio = (double)w / h;
-
-
-
-            //if width >= height
 
             if (image.Width >= image.Height)
 
             {
-
                 //set the width to 32 and compute the height
-
                 tw = 256;
-
                 th = (int)(tw / whRatio);
-
             }
-
             else
-
             {
-
                 //otherwise set the height to 32 and compute the width
-
                 th = 256;
-
                 tw = (int)(th * whRatio);
-
             }
-
-
 
             //now we compute where in our final image we're going to draw it
-
             tx = (256 - tw) / 2;
-
             ty = (256 - th) / 2;
 
-
-
             //create our final image - you can set the PixelFormat to anything that suits
-
             Bitmap thumb = new Bitmap(256, 256, PixelFormat.Format24bppRgb);
 
-
-
-            //get a Graphics from acacthis final image
-
+            //get a Graphics from this final image
             Graphics g = Graphics.FromImage(thumb);
-
-
 
             //clear the final image to white (or anything else) for the areas that the input image doesn't cover
 
             g.Clear(Color.FromArgb(150, 150, 150));
 
-            //housework -
-
             g.InterpolationMode = InterpolationMode.NearestNeighbor;
-
-
-
             g.DrawImage(image, new Rectangle(tx, ty, tw, th), new Rectangle(0, 0, w, h), GraphicsUnit.Pixel);
-
-
 
             return thumb;
         }
