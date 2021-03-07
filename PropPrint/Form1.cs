@@ -95,9 +95,9 @@ namespace PropPrint
             // set form fields
             comboBoxUoM.SelectedItem = cm;
             comboBoxPageFormat.SelectedItem = A4_port;
-            textBoxSize.Text = size.ToString("F2");
-            textBoxMargin.Text = margin.ToString("F2");
-            textBoxOverlap.Text = overlap.ToString("F2");
+            textBoxSizeWidth.Text = size.ToString("F2");
+            textBoxMarginTop.Text = margin.ToString("F2");
+            textBoxOverlapTop.Text = overlap.ToString("F2");
 
 
         }
@@ -326,9 +326,9 @@ namespace PropPrint
             // check text inputs
             try
             {
-                size = Convert.ToDouble(textBoxSize.Text);
-                margin = Convert.ToDouble(textBoxMargin.Text);
-                overlap = Convert.ToDouble(textBoxOverlap.Text);
+                size = Convert.ToDouble(textBoxSizeWidth.Text);
+                margin = Convert.ToDouble(textBoxMarginTop.Text);
+                overlap = Convert.ToDouble(textBoxOverlapTop.Text);
             }
             catch
             {
