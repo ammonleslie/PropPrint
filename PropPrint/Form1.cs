@@ -41,6 +41,12 @@ namespace PropPrint
         PageFormat selectedFormat;
         double size, margin, overlap;
 
+        // variables for finer control
+        double sizeHeight, marginSides, overlapSides;
+
+        // booleans to track if user is using finer controls
+        bool maintainAspect, sameMargin, sameOverlap;
+
         // Supported UoMs and PageLayouts
         UoM cm, inch;
         PageFormat A4_port, letter_port, A4_land, letter_land;
@@ -135,6 +141,91 @@ namespace PropPrint
             }
         }
 
+        private void checkBoxMaintainSizeRatio_CheckedChanged(object sender, EventArgs e)
+        {
+            // track if ratio to be maintained
+            maintainAspect = checkBoxMaintainSizeRatio.Checked;
+            
+            // change the read only property of size height text box
+            textBoxSizeHeight.ReadOnly = checkBoxMaintainSizeRatio.Checked;
+
+            // update size height textbox value
+            textBoxSizeHeight.Text = GetSizeHeight().ToString("F2");
+        }
+
+        private double GetSizeHeight()
+        {
+
+            if (originalImage == null)
+            {
+                return 0;
+            }
+            try
+            {
+                size = Convert.ToDouble(textBoxSizeWidth.Text);
+
+                double ratio = size / originalImage.Width;
+
+                sizeHeight = originalImage.Height * ratio;
+
+                return sizeHeight;
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
+        private void textBoxSizeWidth_Leave(object sender, EventArgs e)
+        {
+            if (maintainAspect)
+            {
+                textBoxSizeHeight.Text = GetSizeHeight().ToString("F2");
+            }
+        }
+
+        private void checkBoxMarginAllSides_CheckedChanged(object sender, EventArgs e)
+        {
+            sameMargin = checkBoxMarginAllSides.Checked;
+
+            textBoxMarginSides.ReadOnly = sameMargin;
+
+            if (sameMargin)
+            {
+                marginSides = margin;
+                textBoxMarginSides.Text = textBoxMarginTop.Text;
+            }
+        }
+
+        private void textBoxMarginTop_Leave(object sender, EventArgs e)
+        {
+            if (sameMargin)
+            {
+                textBoxMarginSides.Text = textBoxMarginTop.Text;
+            }
+        }
+
+        private void checkBoxOverlapAllSides_CheckedChanged(object sender, EventArgs e)
+        {
+            sameOverlap = checkBoxOverlapAllSides.Checked;
+
+            textBoxOverlapSides.ReadOnly = sameOverlap;
+
+            if (sameOverlap)
+            {
+                overlapSides = overlap;
+                textBoxOverlapSides.Text = textBoxOverlapTop.Text;
+            }
+        }
+
+        private void textBoxOverlapTop_Leave(object sender, EventArgs e)
+        {
+            if (sameOverlap)
+            {
+                textBoxOverlapSides.Text = textBoxOverlapTop.Text;
+            }
+        }
+
         /// <summary>
         /// On click, allows the user to import an image for processing
         /// </summary>
@@ -149,6 +240,7 @@ namespace PropPrint
                 editImage = (Image)originalImage.Clone();
             }
 
+            textBoxSizeHeight.Text = GetSizeHeight().ToString("F2");
             updatePreview();
         }
 

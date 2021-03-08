@@ -52,18 +52,18 @@ namespace PropPrint
             this.labelMarginUnits = new System.Windows.Forms.Label();
             this.labelOverlapUnits = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.label6 = new System.Windows.Forms.Label();
-            this.label7 = new System.Windows.Forms.Label();
-            this.label8 = new System.Windows.Forms.Label();
-            this.label9 = new System.Windows.Forms.Label();
-            this.label10 = new System.Windows.Forms.Label();
-            this.textBoxSizeHeight = new System.Windows.Forms.TextBox();
-            this.textBoxMarginSides = new System.Windows.Forms.TextBox();
-            this.textBoxOverlapSides = new System.Windows.Forms.TextBox();
-            this.checkBoxMaintainSizeRatio = new System.Windows.Forms.CheckBox();
-            this.checkBoxMarginAllSides = new System.Windows.Forms.CheckBox();
             this.checkBoxOverlapAllSides = new System.Windows.Forms.CheckBox();
+            this.checkBoxMarginAllSides = new System.Windows.Forms.CheckBox();
+            this.checkBoxMaintainSizeRatio = new System.Windows.Forms.CheckBox();
+            this.textBoxOverlapSides = new System.Windows.Forms.TextBox();
+            this.textBoxMarginSides = new System.Windows.Forms.TextBox();
+            this.textBoxSizeHeight = new System.Windows.Forms.TextBox();
+            this.label10 = new System.Windows.Forms.Label();
+            this.label9 = new System.Windows.Forms.Label();
+            this.label8 = new System.Windows.Forms.Label();
+            this.label7 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxImagePreview)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -120,6 +120,7 @@ namespace PropPrint
             this.textBoxSizeWidth.Name = "textBoxSizeWidth";
             this.textBoxSizeWidth.Size = new System.Drawing.Size(77, 20);
             this.textBoxSizeWidth.TabIndex = 5;
+            this.textBoxSizeWidth.Leave += new System.EventHandler(this.textBoxSizeWidth_Leave);
             // 
             // comboBoxUoM
             // 
@@ -188,6 +189,7 @@ namespace PropPrint
             this.textBoxOverlapTop.Name = "textBoxOverlapTop";
             this.textBoxOverlapTop.Size = new System.Drawing.Size(77, 20);
             this.textBoxOverlapTop.TabIndex = 13;
+            this.textBoxOverlapTop.Leave += new System.EventHandler(this.textBoxOverlapTop_Leave);
             // 
             // textBoxMarginTop
             // 
@@ -195,6 +197,7 @@ namespace PropPrint
             this.textBoxMarginTop.Name = "textBoxMarginTop";
             this.textBoxMarginTop.Size = new System.Drawing.Size(77, 20);
             this.textBoxMarginTop.TabIndex = 15;
+            this.textBoxMarginTop.Leave += new System.EventHandler(this.textBoxMarginTop_Leave);
             // 
             // imageListPages
             // 
@@ -286,93 +289,17 @@ namespace PropPrint
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Settings";
             // 
-            // groupBox2
+            // checkBoxOverlapAllSides
             // 
-            this.groupBox2.Controls.Add(this.listViewPrintPreview);
-            this.groupBox2.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.groupBox2.Location = new System.Drawing.Point(949, 13);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(389, 675);
-            this.groupBox2.TabIndex = 23;
-            this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Pages Preview";
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Location = new System.Drawing.Point(282, 155);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(36, 13);
-            this.label6.TabIndex = 22;
-            this.label6.Text = "Sides:";
-            // 
-            // label7
-            // 
-            this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(126, 155);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(67, 13);
-            this.label7.TabIndex = 23;
-            this.label7.Text = "Top/Bottom:";
-            // 
-            // label8
-            // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(126, 129);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(67, 13);
-            this.label8.TabIndex = 24;
-            this.label8.Text = "Top/Bottom:";
-            // 
-            // label9
-            // 
-            this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(282, 129);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(36, 13);
-            this.label9.TabIndex = 25;
-            this.label9.Text = "Sides:";
-            // 
-            // label10
-            // 
-            this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(282, 76);
-            this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(12, 13);
-            this.label10.TabIndex = 26;
-            this.label10.Text = "x";
-            // 
-            // textBoxSizeHeight
-            // 
-            this.textBoxSizeHeight.Location = new System.Drawing.Point(300, 73);
-            this.textBoxSizeHeight.Name = "textBoxSizeHeight";
-            this.textBoxSizeHeight.Size = new System.Drawing.Size(77, 20);
-            this.textBoxSizeHeight.TabIndex = 27;
-            // 
-            // textBoxMarginSides
-            // 
-            this.textBoxMarginSides.Location = new System.Drawing.Point(324, 126);
-            this.textBoxMarginSides.Name = "textBoxMarginSides";
-            this.textBoxMarginSides.Size = new System.Drawing.Size(77, 20);
-            this.textBoxMarginSides.TabIndex = 28;
-            // 
-            // textBoxOverlapSides
-            // 
-            this.textBoxOverlapSides.Location = new System.Drawing.Point(324, 152);
-            this.textBoxOverlapSides.Name = "textBoxOverlapSides";
-            this.textBoxOverlapSides.Size = new System.Drawing.Size(77, 20);
-            this.textBoxOverlapSides.TabIndex = 29;
-            // 
-            // checkBoxMaintainSizeRatio
-            // 
-            this.checkBoxMaintainSizeRatio.AutoSize = true;
-            this.checkBoxMaintainSizeRatio.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.checkBoxMaintainSizeRatio.Location = new System.Drawing.Point(471, 75);
-            this.checkBoxMaintainSizeRatio.Name = "checkBoxMaintainSizeRatio";
-            this.checkBoxMaintainSizeRatio.Size = new System.Drawing.Size(124, 17);
-            this.checkBoxMaintainSizeRatio.TabIndex = 31;
-            this.checkBoxMaintainSizeRatio.Text = "Maintain aspect ratio";
-            this.checkBoxMaintainSizeRatio.UseVisualStyleBackColor = true;
+            this.checkBoxOverlapAllSides.AutoSize = true;
+            this.checkBoxOverlapAllSides.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.checkBoxOverlapAllSides.Location = new System.Drawing.Point(471, 154);
+            this.checkBoxOverlapAllSides.Name = "checkBoxOverlapAllSides";
+            this.checkBoxOverlapAllSides.Size = new System.Drawing.Size(139, 17);
+            this.checkBoxOverlapAllSides.TabIndex = 33;
+            this.checkBoxOverlapAllSides.Text = "One overlap for all sides";
+            this.checkBoxOverlapAllSides.UseVisualStyleBackColor = true;
+            this.checkBoxOverlapAllSides.CheckedChanged += new System.EventHandler(this.checkBoxOverlapAllSides_CheckedChanged);
             // 
             // checkBoxMarginAllSides
             // 
@@ -384,17 +311,96 @@ namespace PropPrint
             this.checkBoxMarginAllSides.TabIndex = 32;
             this.checkBoxMarginAllSides.Text = "One margin for all sides";
             this.checkBoxMarginAllSides.UseVisualStyleBackColor = true;
+            this.checkBoxMarginAllSides.CheckedChanged += new System.EventHandler(this.checkBoxMarginAllSides_CheckedChanged);
             // 
-            // checkBoxOverlapAllSides
+            // checkBoxMaintainSizeRatio
             // 
-            this.checkBoxOverlapAllSides.AutoSize = true;
-            this.checkBoxOverlapAllSides.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
-            this.checkBoxOverlapAllSides.Location = new System.Drawing.Point(471, 154);
-            this.checkBoxOverlapAllSides.Name = "checkBoxOverlapAllSides";
-            this.checkBoxOverlapAllSides.Size = new System.Drawing.Size(139, 17);
-            this.checkBoxOverlapAllSides.TabIndex = 33;
-            this.checkBoxOverlapAllSides.Text = "One overlap for all sides";
-            this.checkBoxOverlapAllSides.UseVisualStyleBackColor = true;
+            this.checkBoxMaintainSizeRatio.AutoSize = true;
+            this.checkBoxMaintainSizeRatio.ForeColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.checkBoxMaintainSizeRatio.Location = new System.Drawing.Point(471, 75);
+            this.checkBoxMaintainSizeRatio.Name = "checkBoxMaintainSizeRatio";
+            this.checkBoxMaintainSizeRatio.Size = new System.Drawing.Size(124, 17);
+            this.checkBoxMaintainSizeRatio.TabIndex = 31;
+            this.checkBoxMaintainSizeRatio.Text = "Maintain aspect ratio";
+            this.checkBoxMaintainSizeRatio.UseVisualStyleBackColor = true;
+            this.checkBoxMaintainSizeRatio.CheckedChanged += new System.EventHandler(this.checkBoxMaintainSizeRatio_CheckedChanged);
+            // 
+            // textBoxOverlapSides
+            // 
+            this.textBoxOverlapSides.Location = new System.Drawing.Point(324, 152);
+            this.textBoxOverlapSides.Name = "textBoxOverlapSides";
+            this.textBoxOverlapSides.Size = new System.Drawing.Size(77, 20);
+            this.textBoxOverlapSides.TabIndex = 29;
+            // 
+            // textBoxMarginSides
+            // 
+            this.textBoxMarginSides.Location = new System.Drawing.Point(324, 126);
+            this.textBoxMarginSides.Name = "textBoxMarginSides";
+            this.textBoxMarginSides.Size = new System.Drawing.Size(77, 20);
+            this.textBoxMarginSides.TabIndex = 28;
+            // 
+            // textBoxSizeHeight
+            // 
+            this.textBoxSizeHeight.Location = new System.Drawing.Point(300, 73);
+            this.textBoxSizeHeight.Name = "textBoxSizeHeight";
+            this.textBoxSizeHeight.Size = new System.Drawing.Size(77, 20);
+            this.textBoxSizeHeight.TabIndex = 27;
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(282, 76);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(12, 13);
+            this.label10.TabIndex = 26;
+            this.label10.Text = "x";
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(282, 129);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(36, 13);
+            this.label9.TabIndex = 25;
+            this.label9.Text = "Sides:";
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(126, 129);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(67, 13);
+            this.label8.TabIndex = 24;
+            this.label8.Text = "Top/Bottom:";
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(126, 155);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(67, 13);
+            this.label7.TabIndex = 23;
+            this.label7.Text = "Top/Bottom:";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(282, 155);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(36, 13);
+            this.label6.TabIndex = 22;
+            this.label6.Text = "Sides:";
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.listViewPrintPreview);
+            this.groupBox2.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
+            this.groupBox2.Location = new System.Drawing.Point(949, 13);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(389, 675);
+            this.groupBox2.TabIndex = 23;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Pages Preview";
             // 
             // Form1
             // 
