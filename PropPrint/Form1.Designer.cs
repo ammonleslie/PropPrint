@@ -94,7 +94,7 @@ namespace PropPrint
             // 
             this.buttonImportImage.Location = new System.Drawing.Point(165, 420);
             this.buttonImportImage.Name = "buttonImportImage";
-            this.buttonImportImage.Size = new System.Drawing.Size(123, 23);
+            this.buttonImportImage.Size = new System.Drawing.Size(123, 31);
             this.buttonImportImage.TabIndex = 3;
             this.buttonImportImage.Text = "&Import image...";
             this.buttonImportImage.UseVisualStyleBackColor = true;
@@ -345,6 +345,7 @@ namespace PropPrint
             this.textBoxSizeHeight.Name = "textBoxSizeHeight";
             this.textBoxSizeHeight.Size = new System.Drawing.Size(77, 20);
             this.textBoxSizeHeight.TabIndex = 27;
+            this.textBoxSizeHeight.Leave += new System.EventHandler(this.textBoxSizeHeight_Leave);
             // 
             // label10
             // 

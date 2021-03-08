@@ -39,7 +39,7 @@ namespace PropPrint
         // variables for user input
         UoM selectedUnit;
         PageFormat selectedFormat;
-        double size, margin, overlap;
+        double sizeWidth, margin, overlap;
 
         // variables for finer control
         double sizeHeight, marginSides, overlapSides;
@@ -58,6 +58,7 @@ namespace PropPrint
         public const double DEFAULT_SIZE = 10;
         public const double DEFAULT_MARGIN = 1;
         public const double DEFAULT_OVERLAP = 1;
+        public const double MIN_SIZE = 1;
 
         public Form1()
         {
@@ -94,16 +95,22 @@ namespace PropPrint
             // set variables
             selectedUnit = cm;
             selectedFormat = A4_port;
-            size = DEFAULT_SIZE;
+            sizeWidth = DEFAULT_SIZE;
+            sizeHeight = DEFAULT_SIZE;
             margin = DEFAULT_MARGIN;
             overlap = DEFAULT_OVERLAP;
+
+            maintainAspect = true;
 
             // set form fields
             comboBoxUoM.SelectedItem = cm;
             comboBoxPageFormat.SelectedItem = A4_port;
-            textBoxSizeWidth.Text = size.ToString("F2");
+            textBoxSizeWidth.Text = sizeWidth.ToString("F2");
+            textBoxSizeHeight.Text = sizeHeight.ToString("F2");
             textBoxMarginTop.Text = margin.ToString("F2");
             textBoxOverlapTop.Text = overlap.ToString("F2");
+
+            checkBoxMaintainSizeRatio.Checked = true;
 
 
         }
@@ -162,9 +169,9 @@ namespace PropPrint
             }
             try
             {
-                size = Convert.ToDouble(textBoxSizeWidth.Text);
+                sizeWidth = Convert.ToDouble(textBoxSizeWidth.Text);
 
-                double ratio = size / originalImage.Width;
+                double ratio = sizeWidth / originalImage.Width;
 
                 sizeHeight = originalImage.Height * ratio;
 
@@ -178,10 +185,41 @@ namespace PropPrint
 
         private void textBoxSizeWidth_Leave(object sender, EventArgs e)
         {
+            
+            
+            try
+            {
+                double tempSize = Convert.ToDouble(textBoxSizeWidth.Text);
+
+                if (tempSize >= MIN_SIZE)
+                {
+                    sizeWidth = tempSize;
+
+                    // update height if aspect ratio is maintained
+                    if (maintainAspect)
+                    {
+                        sizeHeight = GetSizeHeight();
+                        textBoxSizeHeight.Text = sizeHeight.ToString("F2");
+                        textBoxSizeWidth.Text = sizeWidth.ToString("F2");
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Invalid value entered. Please enter a decimal value greater than or equal to " + MIN_SIZE + ".");
+                }
+            }
+            catch
+            {
+                MessageBox.Show("Invalid value entered. Please enter a proper decimal value eg. 2, 11.5, 7.0.");
+            }
+            
+            textBoxSizeWidth.Text = sizeWidth.ToString("F2");
+
             if (maintainAspect)
             {
-                textBoxSizeHeight.Text = GetSizeHeight().ToString("F2");
+                textBoxSizeHeight.Text = sizeHeight.ToString("F2");
             }
+
         }
 
         private void checkBoxMarginAllSides_CheckedChanged(object sender, EventArgs e)
@@ -223,6 +261,65 @@ namespace PropPrint
             if (sameOverlap)
             {
                 textBoxOverlapSides.Text = textBoxOverlapTop.Text;
+            }
+        }
+
+        private void textBoxSizeHeight_Leave(object sender, EventArgs e)
+        {
+            if (!maintainAspect)
+            {
+                try
+                {
+                    double tempSizeHeight = Convert.ToDouble(textBoxSizeHeight.Text);
+
+                    if (tempSizeHeight >= MIN_SIZE)
+                    {
+                        sizeHeight = tempSizeHeight;
+
+                        // update width if aspect ratio is maintained
+                        if (maintainAspect)
+                        {
+                            sizeWidth = GetSizeWidth();
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Invalid value entered. Please enter a decimal value greater than or equal to " + MIN_SIZE + ".");
+                    }
+                }
+                catch
+                {
+                    MessageBox.Show("Invalid value entered. Please enter a proper decimal value eg. 2, 11.5, 7.0.");
+                }
+
+                textBoxSizeHeight.Text = sizeHeight.ToString("F2");
+
+                if (maintainAspect)
+                {
+                    textBoxSizeWidth.Text = sizeWidth.ToString("F2");
+                }
+            }
+        }
+
+        private double GetSizeWidth()
+        {
+            if (originalImage == null)
+            {
+                return 0;
+            }
+            try
+            {
+                sizeHeight = Convert.ToDouble(textBoxSizeHeight.Text);
+
+                double ratio = sizeHeight / originalImage.Height;
+
+                sizeWidth = originalImage.Width * ratio;
+
+                return sizeWidth;
+            }
+            catch
+            {
+                return 0;
             }
         }
 
@@ -285,14 +382,16 @@ namespace PropPrint
                     Console.WriteLine("Current height: " + currentUnitHeight + selectedUnit.Name());
 
                     // calculate scale
-                    double scale = size / currentUnitWidth;
+                    double scaleX = sizeWidth / currentUnitWidth;
+                    double scaleY = sizeHeight / currentUnitHeight;
 
                     // get new pixel dimensions based on scale
-                    newPixelWidth = (int)(originalImage.Width * scale);
-                    newPixelHeight = (int)(originalImage.Height * scale);
+                    newPixelWidth = (int)(originalImage.Width * scaleX);
+                    newPixelHeight = (int)(originalImage.Height * scaleY);
 
-                    Console.WriteLine("New width: " + size + selectedUnit.Name());
-                    Console.WriteLine("Scale: " + scale);
+                    Console.WriteLine("New width: " + sizeWidth + selectedUnit.Name());
+                    Console.WriteLine("X Scale: " + scaleX);
+                    Console.WriteLine("Y Scale: " + scaleY);
                     Console.WriteLine("New dimensions: " + newPixelWidth + "x" + newPixelHeight);
 
                     // resize original image and save to edit image
@@ -418,18 +517,14 @@ namespace PropPrint
             // check text inputs
             try
             {
-                size = Convert.ToDouble(textBoxSizeWidth.Text);
+                //// commenting out as checks are moved to their respective control Leave event
+                // sizeWidth = Convert.ToDouble(textBoxSizeWidth.Text);
                 margin = Convert.ToDouble(textBoxMarginTop.Text);
                 overlap = Convert.ToDouble(textBoxOverlapTop.Text);
             }
             catch
             {
                 message += " - One or more inpuit field is not formatted correctly, please use decimal values eg. 2, 5.5, 12.0 \n";
-            }
-
-            if (size <= 0)
-            {
-                message += " - New size must be greater than 0 \n";
             }
 
             // check if image imported
