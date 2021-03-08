@@ -151,7 +151,7 @@ namespace PropPrint
             maintainAspect = checkBoxMaintainSizeRatio.Checked;
             
             // change the read only property of size height text box
-            textBoxSizeHeight.ReadOnly = checkBoxMaintainSizeRatio.Checked;
+            //textBoxSizeHeight.ReadOnly = checkBoxMaintainSizeRatio.Checked;
 
             // update size height textbox value
             textBoxSizeHeight.Text = GetSizeHeight().ToString("F2");
@@ -182,8 +182,6 @@ namespace PropPrint
 
         private void textBoxSizeWidth_Leave(object sender, EventArgs e)
         {
-            
-            
             try
             {
                 double tempSize = Convert.ToDouble(textBoxSizeWidth.Text);
@@ -196,8 +194,6 @@ namespace PropPrint
                     if (maintainAspect)
                     {
                         sizeHeight = GetSizeHeight();
-                        textBoxSizeHeight.Text = sizeHeight.ToString("F2");
-                        textBoxSizeWidth.Text = sizeWidth.ToString("F2");
                     }
                 }
                 else
@@ -209,13 +205,9 @@ namespace PropPrint
             {
                 MessageBox.Show("Invalid value entered. Please enter a proper decimal value eg. 2, 11.5, 7.0.");
             }
-            
-            textBoxSizeWidth.Text = sizeWidth.ToString("F2");
 
-            if (maintainAspect)
-            {
-                textBoxSizeHeight.Text = sizeHeight.ToString("F2");
-            }
+            textBoxSizeHeight.Text = sizeHeight.ToString("F2");
+            textBoxSizeWidth.Text = sizeWidth.ToString("F2");
 
         }
 
@@ -237,6 +229,7 @@ namespace PropPrint
             try
             {
                 double tempMarginTop = Convert.ToDouble(textBoxMarginTop.Text);
+
                 if (tempMarginTop >= MIN_MARGIN)
                 {
                     marginTop = tempMarginTop;
@@ -254,8 +247,6 @@ namespace PropPrint
             if (sameMargin)
             {
                 marginSides = marginTop;
-
-                textBoxMarginSides.Text = textBoxMarginTop.Text;
             }
 
             textBoxMarginTop.Text = marginTop.ToString("F2");
@@ -287,39 +278,32 @@ namespace PropPrint
 
         private void textBoxSizeHeight_Leave(object sender, EventArgs e)
         {
-            if (!maintainAspect)
+            try
             {
-                try
+                double tempSizeHeight = Convert.ToDouble(textBoxSizeHeight.Text);
+
+                if (tempSizeHeight >= MIN_SIZE)
                 {
-                    double tempSizeHeight = Convert.ToDouble(textBoxSizeHeight.Text);
+                    sizeHeight = tempSizeHeight;
 
-                    if (tempSizeHeight >= MIN_SIZE)
+                    // update width if aspect ratio is maintained
+                    if (maintainAspect)
                     {
-                        sizeHeight = tempSizeHeight;
-
-                        // update width if aspect ratio is maintained
-                        if (maintainAspect)
-                        {
-                            sizeWidth = GetSizeWidth();
-                        }
-                    }
-                    else
-                    {
-                        MessageBox.Show("Invalid value entered. Please enter a decimal value greater than or equal to " + MIN_SIZE + ".");
+                        sizeWidth = GetSizeWidth();
                     }
                 }
-                catch
+                else
                 {
-                    MessageBox.Show("Invalid value entered. Please enter a proper decimal value eg. 2, 11.5, 7.0.");
-                }
-
-                textBoxSizeHeight.Text = sizeHeight.ToString("F2");
-
-                if (maintainAspect)
-                {
-                    textBoxSizeWidth.Text = sizeWidth.ToString("F2");
+                    MessageBox.Show("Invalid value entered. Please enter a decimal value greater than or equal to " + MIN_SIZE + ".");
                 }
             }
+            catch
+            {
+                MessageBox.Show("Invalid value entered. Please enter a proper decimal value eg. 2, 11.5, 7.0.");
+            }
+
+            textBoxSizeHeight.Text = sizeHeight.ToString("F2");
+            textBoxSizeWidth.Text = sizeWidth.ToString("F2");
         }
 
         private double GetSizeWidth()
