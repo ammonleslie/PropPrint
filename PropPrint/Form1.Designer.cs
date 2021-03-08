@@ -338,6 +338,7 @@ namespace PropPrint
             this.textBoxMarginSides.Name = "textBoxMarginSides";
             this.textBoxMarginSides.Size = new System.Drawing.Size(77, 20);
             this.textBoxMarginSides.TabIndex = 28;
+            this.textBoxMarginSides.Leave += new System.EventHandler(this.textBoxMarginSides_Leave);
             // 
             // textBoxSizeHeight
             // 

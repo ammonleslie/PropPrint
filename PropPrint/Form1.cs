@@ -17,12 +17,6 @@ namespace PropPrint
 {
     public partial class Form1 : Form
     {
-        public enum Units
-        {
-            mm,
-            inch
-        }
-        
         private Image originalImage;
         // copy of original to use for editing
         private Image editImage;
@@ -39,7 +33,7 @@ namespace PropPrint
         // variables for user input
         UoM selectedUnit;
         PageFormat selectedFormat;
-        double sizeWidth, margin, overlap;
+        double sizeWidth, marginTop, overlap;
 
         // variables for finer control
         double sizeHeight, marginSides, overlapSides;
@@ -59,6 +53,7 @@ namespace PropPrint
         public const double DEFAULT_MARGIN = 1;
         public const double DEFAULT_OVERLAP = 1;
         public const double MIN_SIZE = 1;
+        public const double MIN_MARGIN = 0;
 
         public Form1()
         {
@@ -97,20 +92,22 @@ namespace PropPrint
             selectedFormat = A4_port;
             sizeWidth = DEFAULT_SIZE;
             sizeHeight = DEFAULT_SIZE;
-            margin = DEFAULT_MARGIN;
+            marginTop = DEFAULT_MARGIN;
             overlap = DEFAULT_OVERLAP;
 
-            maintainAspect = true;
+           // maintainAspect = true;
+            //sameMargin = true;
 
             // set form fields
             comboBoxUoM.SelectedItem = cm;
             comboBoxPageFormat.SelectedItem = A4_port;
             textBoxSizeWidth.Text = sizeWidth.ToString("F2");
             textBoxSizeHeight.Text = sizeHeight.ToString("F2");
-            textBoxMarginTop.Text = margin.ToString("F2");
+            textBoxMarginTop.Text = marginTop.ToString("F2");
             textBoxOverlapTop.Text = overlap.ToString("F2");
 
             checkBoxMaintainSizeRatio.Checked = true;
+            checkBoxMarginAllSides.Checked = true;
 
 
         }
@@ -230,18 +227,42 @@ namespace PropPrint
 
             if (sameMargin)
             {
-                marginSides = margin;
+                marginSides = marginTop;
                 textBoxMarginSides.Text = textBoxMarginTop.Text;
             }
         }
 
         private void textBoxMarginTop_Leave(object sender, EventArgs e)
         {
+            try
+            {
+                double tempMarginTop = Convert.ToDouble(textBoxMarginTop.Text);
+                if (tempMarginTop >= MIN_MARGIN)
+                {
+                    marginTop = tempMarginTop;
+                }
+                else
+                {
+                    MessageBox.Show("Invalid value entered. Please enter a decimal value greater than or equal to " + MIN_MARGIN + ".");
+                }
+            }
+            catch
+            {
+                MessageBox.Show("Invalid value entered. Please enter a proper decimal value eg. 2, 11.5, 7.0.");
+            }
+
             if (sameMargin)
             {
+                marginSides = marginTop;
+
                 textBoxMarginSides.Text = textBoxMarginTop.Text;
             }
+
+            textBoxMarginTop.Text = marginTop.ToString("F2");
+            textBoxMarginSides.Text = marginSides.ToString("F2");
         }
+
+
 
         private void checkBoxOverlapAllSides_CheckedChanged(object sender, EventArgs e)
         {
@@ -323,6 +344,32 @@ namespace PropPrint
             }
         }
 
+        private void textBoxMarginSides_Leave(object sender, EventArgs e)
+        {
+            if (!sameMargin)
+            {
+                try
+                {
+                    double tempMarginSides = Convert.ToDouble(textBoxMarginSides.Text);
+
+                    if (tempMarginSides >= MIN_MARGIN)
+                    {
+                        marginSides = tempMarginSides;
+                    }
+                    else
+                    {
+                        MessageBox.Show("Invalid value entered. Please enter a decimal value greater than or equal to " + MIN_MARGIN + ".");
+                    }
+                }
+                catch
+                {
+                    MessageBox.Show("Invalid value entered. Please enter a proper decimal value eg. 2, 11.5, 7.0.");
+                }
+            }
+
+            textBoxMarginSides.Text = marginSides.ToString("F2");
+        }
+
         /// <summary>
         /// On click, allows the user to import an image for processing
         /// </summary>
@@ -338,13 +385,13 @@ namespace PropPrint
             }
 
             textBoxSizeHeight.Text = GetSizeHeight().ToString("F2");
-            updatePreview();
+            UpdatePreview();
         }
 
         /// <summary>
         /// Refreshes the image preview to display the most recent version of the editing image
         /// </summary>
-        private void updatePreview()
+        private void UpdatePreview()
         {
             pictureBoxImagePreview.Image = editImage;
 
@@ -400,7 +447,7 @@ namespace PropPrint
                     Console.WriteLine("Image resize complete!");
 
                     // refresh preview
-                    updatePreview();
+                    UpdatePreview();
                 }
 
                 catch (Exception ex)
@@ -455,7 +502,8 @@ namespace PropPrint
                 Pen pen = new Pen(Color.Red, 3);
 
                 // get margin size in pixels
-                int marginPixels = selectedUnit.ToPixels(margin);
+                int marginPixelsTop = selectedUnit.ToPixels(marginTop);
+                int marginPixelsSides = selectedUnit.ToPixels(marginSides);
 
                 selectedFormat = (PageFormat)comboBoxPageFormat.SelectedItem;
 
@@ -477,7 +525,7 @@ namespace PropPrint
                         using (Graphics g = Graphics.FromImage(cutImage))
                         {
                             g.FillRectangle(Brushes.White, 0, 0, cutImage.Width, cutImage.Height);
-                            g.DrawImage(editImageClean, marginPixels, marginPixels, cutLines, GraphicsUnit.Pixel);
+                            g.DrawImage(editImageClean, marginPixelsSides, marginPixelsTop, cutLines, GraphicsUnit.Pixel);
                         }
 
                         generatedPagesList.Add(cutImage);
@@ -497,7 +545,7 @@ namespace PropPrint
                     this.listViewPrintPreview.Items.Add(item);
                 }
 
-                updatePreview();
+                UpdatePreview();
 
             }
 
@@ -519,7 +567,7 @@ namespace PropPrint
             {
                 //// commenting out as checks are moved to their respective control Leave event
                 // sizeWidth = Convert.ToDouble(textBoxSizeWidth.Text);
-                margin = Convert.ToDouble(textBoxMarginTop.Text);
+                // marginTop = Convert.ToDouble(textBoxMarginTop.Text);
                 overlap = Convert.ToDouble(textBoxOverlapTop.Text);
             }
             catch
@@ -627,8 +675,8 @@ namespace PropPrint
                 }
 
                 // account for margin
-                double imageWidth = selectedFormatWidth - margin * 2;
-                double imageHeight = selectedFormatHeight - margin * 2;
+                double imageWidth = selectedFormatWidth - marginSides * 2;
+                double imageHeight = selectedFormatHeight - marginTop * 2;
 
                 // calculate pixel dimensions
                 int width = selectedUnit.ToPixels(imageWidth);
