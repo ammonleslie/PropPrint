@@ -17,6 +17,7 @@ namespace PropPrint
 {
     public partial class Form1 : Form
     {
+        // stores a copy of the original imported image
         private Image originalImage;
         // copy of original to use for editing
         private Image editImage;
@@ -28,6 +29,7 @@ namespace PropPrint
         // list for storing generated pages
         private List<Image> generatedPagesList = new List<Image>();
 
+        // used to store generated PDF file
         private PdfDocument pdf;
 
         // variables for user input
@@ -82,35 +84,11 @@ namespace PropPrint
 
         }
 
+        // ####### INITIALIZATION METHODS #######
+
         /// <summary>
-        /// Sets the input variables to their default values 
-        /// and updates the form fields with the new values
+        /// Creates Page Formats and adds them to the appropriate form control
         /// </summary>
-        private void SetInputDefaults()
-        {
-            // set variables
-            selectedUnit = cm;
-            selectedFormat = A4_port;
-            sizeWidth = DEFAULT_SIZE;
-            sizeHeight = DEFAULT_SIZE;
-            marginTop = DEFAULT_MARGIN;
-            overlapTop = DEFAULT_OVERLAP;
-
-            // set form fields
-            comboBoxUoM.SelectedItem = cm;
-            comboBoxPageFormat.SelectedItem = A4_port;
-            textBoxSizeWidth.Text = sizeWidth.ToString("F2");
-            textBoxSizeHeight.Text = sizeHeight.ToString("F2");
-            textBoxMarginTop.Text = marginTop.ToString("F2");
-            textBoxOverlapTop.Text = overlapTop.ToString("F2");
-
-            checkBoxMaintainSizeRatio.Checked = true;
-            checkBoxMarginAllSides.Checked = true;
-            checkBoxOverlapAllSides.Checked = true;
-
-
-        }
-
         private void populatePageSizes()
         {
             A4_port = new PageFormat("A4 Portrait", 21.0, 29.7, cm, true);
@@ -130,6 +108,9 @@ namespace PropPrint
             }
         }
 
+        /// <summary>
+        /// Creates UoM objects and adds them to the appropriate form control
+        /// </summary>
         private void populateUnits()
         {
             cm = new UoM("cm", 28.3465);
@@ -144,41 +125,112 @@ namespace PropPrint
             }
         }
 
+        /// <summary>
+        /// Sets the input variables to their default values 
+        /// and updates the form fields with the corresponding values
+        /// </summary>
+        private void SetInputDefaults()
+        {
+            // set variables
+            selectedUnit = cm;
+            selectedFormat = A4_port;
+            sizeWidth = DEFAULT_SIZE;
+            sizeHeight = DEFAULT_SIZE;
+            marginTop = DEFAULT_MARGIN;
+            overlapTop = DEFAULT_OVERLAP;
+
+            // set form fields
+            comboBoxUoM.SelectedItem = cm;
+            comboBoxPageFormat.SelectedItem = A4_port;
+
+            textBoxSizeWidth.Text = sizeWidth.ToString("F2");
+            textBoxSizeHeight.Text = sizeHeight.ToString("F2");
+            textBoxMarginTop.Text = marginTop.ToString("F2");
+            textBoxOverlapTop.Text = overlapTop.ToString("F2");
+
+            checkBoxMaintainSizeRatio.Checked = true;
+            checkBoxMarginAllSides.Checked = true;
+            checkBoxOverlapAllSides.Checked = true;
+        }
+
+        // ####### CHECKBOX CHECKED CHANGED EVENTS #######
+
+        /// <summary>
+        /// On check change, switches the value of the maintain aspect tracker boolean 
+        /// and if aspect ratio is set to be maintained, updates the size height textbox 
+        /// based on the size width
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void checkBoxMaintainSizeRatio_CheckedChanged(object sender, EventArgs e)
         {
             // track if ratio to be maintained
             maintainAspect = checkBoxMaintainSizeRatio.Checked;
-            
-            // change the read only property of size height text box
-            //textBoxSizeHeight.ReadOnly = checkBoxMaintainSizeRatio.Checked;
 
             // update size height textbox value
             textBoxSizeHeight.Text = GetSizeHeight().ToString("F2");
+
+            if (maintainAspect)
+            {
+                textBoxSizeWidth.BackColor = Color.FromArgb(220, 240, 255);
+                textBoxSizeHeight.BackColor = Color.FromArgb(220, 240, 255);
+            }
+            else
+            {
+                textBoxSizeWidth.BackColor = SystemColors.Window;
+                textBoxSizeHeight.BackColor = SystemColors.Window;
+            }
         }
 
-        private double GetSizeHeight()
+        /// <summary>
+        /// On check change, switches the value of the same margin on all sides tracker, 
+        /// updates the read-only property of the margin sides textbox accordingly,
+        /// and updates the margin sides value to the top value if all sides are set to be the same
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void checkBoxMarginAllSides_CheckedChanged(object sender, EventArgs e)
         {
+            sameMargin = checkBoxMarginAllSides.Checked;
 
-            if (originalImage == null)
+            textBoxMarginSides.ReadOnly = sameMargin;
+
+            if (sameMargin)
             {
-                return 0;
-            }
-            try
-            {
-                sizeWidth = Convert.ToDouble(textBoxSizeWidth.Text);
-
-                double ratio = sizeWidth / originalImage.Width;
-
-                sizeHeight = originalImage.Height * ratio;
-
-                return sizeHeight;
-            }
-            catch
-            {
-                return 0;
+                marginSides = marginTop;
+                textBoxMarginSides.Text = textBoxMarginTop.Text;
             }
         }
 
+        /// <summary>
+        /// On check change, switches the value of the same overlap on all sides tracker, 
+        /// updates the read-only property of the overlap sides textbox accordingly,
+        /// and updates the overlap sides value to the top value if all sides are set to be the same
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void checkBoxOverlapAllSides_CheckedChanged(object sender, EventArgs e)
+        {
+            sameOverlap = checkBoxOverlapAllSides.Checked;
+
+            textBoxOverlapSides.ReadOnly = sameOverlap;
+
+            if (sameOverlap)
+            {
+                overlapSides = overlapTop;
+                textBoxOverlapSides.Text = textBoxOverlapTop.Text;
+            }
+        }
+
+        // ####### TEXTBOX LEAVE EVENTS #######
+
+        /// <summary>
+        /// On leave, tries to convert the input text to the size width variable, 
+        /// updates size height if aspect ratio is maintained, 
+        /// and updates the size textboxes
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void textBoxSizeWidth_Leave(object sender, EventArgs e)
         {
             try
@@ -210,92 +262,13 @@ namespace PropPrint
 
         }
 
-        private void checkBoxMarginAllSides_CheckedChanged(object sender, EventArgs e)
-        {
-            sameMargin = checkBoxMarginAllSides.Checked;
-
-            textBoxMarginSides.ReadOnly = sameMargin;
-
-            if (sameMargin)
-            {
-                marginSides = marginTop;
-                textBoxMarginSides.Text = textBoxMarginTop.Text;
-            }
-        }
-
-        private void textBoxMarginTop_Leave(object sender, EventArgs e)
-        {
-            try
-            {
-                double tempMarginTop = Convert.ToDouble(textBoxMarginTop.Text);
-
-                if (tempMarginTop >= MIN_MARGIN)
-                {
-                    marginTop = tempMarginTop;
-                }
-                else
-                {
-                    MessageBox.Show("Invalid value entered. Please enter a decimal value greater than or equal to " + MIN_MARGIN + ".");
-                }
-            }
-            catch
-            {
-                MessageBox.Show("Invalid value entered. Please enter a proper decimal value eg. 2, 11.5, 7.0.");
-            }
-
-            if (sameMargin)
-            {
-                marginSides = marginTop;
-            }
-
-            textBoxMarginTop.Text = marginTop.ToString("F2");
-            textBoxMarginSides.Text = marginSides.ToString("F2");
-        }
-
-
-
-        private void checkBoxOverlapAllSides_CheckedChanged(object sender, EventArgs e)
-        {
-            sameOverlap = checkBoxOverlapAllSides.Checked;
-
-            textBoxOverlapSides.ReadOnly = sameOverlap;
-
-            if (sameOverlap)
-            {
-                overlapSides = overlapTop;
-                textBoxOverlapSides.Text = textBoxOverlapTop.Text;
-            }
-        }
-
-        private void textBoxOverlapTop_Leave(object sender, EventArgs e)
-        {
-            try
-            {
-                double tempOverlapTop = Convert.ToDouble(textBoxOverlapTop.Text);
-
-                if (tempOverlapTop >= MIN_OVERLAP)
-                {
-                    overlapTop = tempOverlapTop;
-                }
-                else
-                {
-                    MessageBox.Show("Invalid value entered. Please enter a decimal value greater than or equal to " + MIN_OVERLAP + ".");
-                }
-            }
-            catch
-            {
-                MessageBox.Show("Invalid value entered. Please enter a proper decimal value eg. 2, 11.5, 7.0.");
-            }
-
-            if (sameOverlap)
-            {
-                overlapSides = overlapTop;
-            }
-
-            textBoxOverlapTop.Text = overlapTop.ToString("F2");
-            textBoxOverlapSides.Text = overlapSides.ToString("F2");
-        }
-
+        /// <summary>
+        /// On leave, tries to convert the input text to the size height variable,
+        /// updates size width if aspect ratio is maintained. 
+        /// and updates the size textboxes
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void textBoxSizeHeight_Leave(object sender, EventArgs e)
         {
             try
@@ -326,28 +299,49 @@ namespace PropPrint
             textBoxSizeWidth.Text = sizeWidth.ToString("F2");
         }
 
-        private double GetSizeWidth()
+        /// <summary>
+        /// On leave, tries to convert the input text to the margin top variable, 
+        /// sets the margin sides variable if all sides are set to be the same, and 
+        /// updates the margin textboxes
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void textBoxMarginTop_Leave(object sender, EventArgs e)
         {
-            if (originalImage == null)
-            {
-                return 0;
-            }
             try
             {
-                sizeHeight = Convert.ToDouble(textBoxSizeHeight.Text);
+                double tempMarginTop = Convert.ToDouble(textBoxMarginTop.Text);
 
-                double ratio = sizeHeight / originalImage.Height;
-
-                sizeWidth = originalImage.Width * ratio;
-
-                return sizeWidth;
+                if (tempMarginTop >= MIN_MARGIN)
+                {
+                    marginTop = tempMarginTop;
+                }
+                else
+                {
+                    MessageBox.Show("Invalid value entered. Please enter a decimal value greater than or equal to " + MIN_MARGIN + ".");
+                }
             }
             catch
             {
-                return 0;
+                MessageBox.Show("Invalid value entered. Please enter a proper decimal value eg. 2, 11.5, 7.0.");
             }
+
+            if (sameMargin)
+            {
+                marginSides = marginTop;
+            }
+
+            textBoxMarginTop.Text = marginTop.ToString("F2");
+            textBoxMarginSides.Text = marginSides.ToString("F2");
         }
 
+        /// <summary>
+        /// On leave, if side margins are not set to be the same as the top, 
+        /// tries to convert the input text to the margin sides variable, 
+        /// and updates the margin sides textbox
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void textBoxMarginSides_Leave(object sender, EventArgs e)
         {
             if (!sameMargin)
@@ -374,6 +368,49 @@ namespace PropPrint
             textBoxMarginSides.Text = marginSides.ToString("F2");
         }
 
+        /// <summary>
+        /// On leave, tries to set convert the input text to the overlap top variable, 
+        /// sets the overlap sides variable if they are set to be the same, 
+        /// and updates the overlap textboxes
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void textBoxOverlapTop_Leave(object sender, EventArgs e)
+        {
+            try
+            {
+                double tempOverlapTop = Convert.ToDouble(textBoxOverlapTop.Text);
+
+                if (tempOverlapTop >= MIN_OVERLAP)
+                {
+                    overlapTop = tempOverlapTop;
+                }
+                else
+                {
+                    MessageBox.Show("Invalid value entered. Please enter a decimal value greater than or equal to " + MIN_OVERLAP + ".");
+                }
+            }
+            catch
+            {
+                MessageBox.Show("Invalid value entered. Please enter a proper decimal value eg. 2, 11.5, 7.0.");
+            }
+
+            if (sameOverlap)
+            {
+                overlapSides = overlapTop;
+            }
+
+            textBoxOverlapTop.Text = overlapTop.ToString("F2");
+            textBoxOverlapSides.Text = overlapSides.ToString("F2");
+        }
+
+        /// <summary>
+        /// On leave, if side overlap is not set to be the same as top, 
+        /// tries to convert the input text to the overlap sides variable, 
+        /// and updates the overlap sides textbox
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void textBoxOverlapSides_Leave(object sender, EventArgs e)
         {
             if (!sameOverlap)
@@ -400,12 +437,42 @@ namespace PropPrint
             textBoxOverlapSides.Text = overlapSides.ToString("F2");
         }
 
+        // ####### COMBOBOX INDEX CHANGED EVENTS #######
+
+        /// <summary>
+        /// On index change, updates the selected UoM variable, 
+        /// and changes the unit labels on the form to match
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void comboBoxSizeUnits_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            selectedUnit = (UoM)comboBoxUoM.SelectedItem;
+
+            foreach (Label l in unitLabelsList)
+            {
+                l.Text = selectedUnit.ToString();
+            }
+        }
+
+        /// <summary>
+        /// On index change, updates the selected page format variable
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void comboBoxPageFormat_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            selectedFormat = (PageFormat)comboBoxPageFormat.SelectedItem;
+        }
+
+        // ####### BUTTON CLICK EVENTS #######
+
         /// <summary>
         /// On click, allows the user to import an image for processing
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void button1_Click(object sender, EventArgs e)
+        private void buttonImportImage_Click(object sender, EventArgs e)
         {
             // if the user imports an image, store the original and an editing copy
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
@@ -418,24 +485,13 @@ namespace PropPrint
             UpdatePreview();
         }
 
-        /// <summary>
-        /// Refreshes the image preview to display the most recent version of the editing image
-        /// </summary>
-        private void UpdatePreview()
-        {
-            pictureBoxImagePreview.Image = editImage;
-
-        }
-
         private void buttonApplySettings_Click(object sender, EventArgs e)
         {
             Console.WriteLine("----- START PROCESSING -----");
-            Console.Write("Checking inputs are valid... ");
-            // check inputs are valid
-            if (GetInputs())
-            {
-                Console.WriteLine("Success!");
 
+            // check inputs are valid
+            if (CheckImageImported())
+            {
                 int newPixelWidth, newPixelHeight;
 
                 // reset preview images
@@ -447,16 +503,10 @@ namespace PropPrint
 
                 try
                 {
-                    Console.WriteLine("Applying current settings...");
-
                     // convert original pixel dimensions to selected UoM
                     double currentUnitWidth, currentUnitHeight;
                     currentUnitWidth = selectedUnit.FromPixels(originalImage.Width);
                     currentUnitHeight = selectedUnit.FromPixels(originalImage.Height);
-
-                    Console.WriteLine("Current dimensions: " + originalImage.Width + "x" + originalImage.Height);
-                    Console.WriteLine("Current width: " + currentUnitWidth + selectedUnit.Name());
-                    Console.WriteLine("Current height: " + currentUnitHeight + selectedUnit.Name());
 
                     // calculate scale
                     double scaleX = sizeWidth / currentUnitWidth;
@@ -466,15 +516,8 @@ namespace PropPrint
                     newPixelWidth = (int)(originalImage.Width * scaleX);
                     newPixelHeight = (int)(originalImage.Height * scaleY);
 
-                    Console.WriteLine("New width: " + sizeWidth + selectedUnit.Name());
-                    Console.WriteLine("X Scale: " + scaleX);
-                    Console.WriteLine("Y Scale: " + scaleY);
-                    Console.WriteLine("New dimensions: " + newPixelWidth + "x" + newPixelHeight);
-
                     // resize original image and save to edit image
                     editImage = ResizeImage(originalImage, newPixelWidth, newPixelHeight);
-
-                    Console.WriteLine("Image resize complete!");
 
                     // refresh preview
                     UpdatePreview();
@@ -522,7 +565,7 @@ namespace PropPrint
                 Image editImageClean = (Image)editImage.Clone();
 
                 // convert overlap to pixels
-                int pixelOverlapTop = selectedUnit.ToPixels(overlapTop); 
+                int pixelOverlapTop = selectedUnit.ToPixels(overlapTop);
                 int pixelOverlapSides = selectedUnit.ToPixels(overlapSides);
 
                 // create cutting rectangle at start point
@@ -589,7 +632,113 @@ namespace PropPrint
             Console.WriteLine();
         }
 
-        private bool GetInputs()
+        /// <summary>
+        /// On click, turns the generated pages list into PDF pages, 
+        /// saves it to the directory specified from the save file dialog, 
+        /// and opens the saved PDF file
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void buttonExportPDF_Click(object sender, EventArgs e)
+        {
+            // check pages have been generated
+            if (generatedPagesList.Count > 0)
+            {
+                pdf = new PdfDocument();
+
+                // create a page for each image
+                foreach (Image p in generatedPagesList)
+                {
+                    PdfPage newPage = pdf.AddPage();
+
+                    // set page size to image size
+                    newPage.Width = p.Width;
+                    newPage.Height = p.Height;
+
+                    // get PDF page graphics to draw onto
+                    XGraphics g = XGraphics.FromPdfPage(newPage);
+
+                    // get xImage copy of image
+                    MemoryStream strm = new MemoryStream();
+                    p.Save(strm, System.Drawing.Imaging.ImageFormat.Png);
+                    XImage xImage = XImage.FromStream(strm);
+
+                    // draw image onto PDF page
+                    g.DrawImage(xImage, 0, 0, xImage.Width, xImage.Height);
+
+                    // keep it clean
+                    strm.Close();
+                }
+
+                // save the file and open
+                if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+                {
+                    pdf.Save(saveFileDialog1.FileName);
+                    System.Diagnostics.Process.Start(saveFileDialog1.FileName);
+                }
+            }
+            else
+            {
+                MessageBox.Show("No image has been processed. Please import an image and apply your settings before trying to export to PDF.");
+            }
+        }
+
+        // ####### CUSTOM METHODS #######
+
+        private double GetSizeHeight()
+        {
+
+            if (originalImage == null)
+            {
+                return DEFAULT_SIZE;
+            }
+            try
+            {
+                sizeWidth = Convert.ToDouble(textBoxSizeWidth.Text);
+
+                double ratio = sizeWidth / originalImage.Width;
+
+                sizeHeight = originalImage.Height * ratio;
+
+                return sizeHeight;
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
+        private double GetSizeWidth()
+        {
+            if (originalImage == null)
+            {
+                return DEFAULT_SIZE;
+            }
+            try
+            {
+                sizeHeight = Convert.ToDouble(textBoxSizeHeight.Text);
+
+                double ratio = sizeHeight / originalImage.Height;
+
+                sizeWidth = originalImage.Width * ratio;
+
+                return sizeWidth;
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// Refreshes the image preview to display the most recent version of the editing image
+        /// </summary>
+        private void UpdatePreview()
+        {
+            pictureBoxImagePreview.Image = editImage;
+        }
+
+        private bool CheckImageImported()
         {
             // check if image imported
             if (originalImage == null)
@@ -599,21 +748,6 @@ namespace PropPrint
             }
 
             return true;
-        }
-
-        private void comboBoxSizeUnits_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            selectedUnit = (UoM)comboBoxUoM.SelectedItem;
-
-            foreach (Label l in unitLabelsList)
-            {
-                l.Text = selectedUnit.ToString();
-            }
-        }
-
-        private void comboBoxPageSize_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            selectedFormat = (PageFormat)comboBoxPageFormat.SelectedItem;
         }
 
         private Bitmap GenerateThumbnail(Image image)
@@ -702,43 +836,6 @@ namespace PropPrint
             }
 
             
-        }
-
-        private void buttonExportPDF_Click(object sender, EventArgs e)
-        {
-            if (generatedPagesList.Count > 0)
-            {
-                pdf = new PdfDocument();
-
-                
-
-                foreach (Image p in generatedPagesList)
-                {
-                    PdfPage newPage = pdf.AddPage();
-
-                    newPage.Width = p.Width;
-                    newPage.Height = p.Height;
-
-                    XGraphics g = XGraphics.FromPdfPage(newPage);
-
-                    // get ximage of image
-                    MemoryStream strm = new MemoryStream();
-                    p.Save(strm, System.Drawing.Imaging.ImageFormat.Png);
-
-                    XImage xImage = XImage.FromStream(strm);
-
-                    g.DrawImage(xImage, 0, 0, xImage.Width, xImage.Height);
-                }
-            }
-
-            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
-            {
-                pdf.Save(saveFileDialog1.FileName);
-                
-                MessageBox.Show("File saved!");
-
-                System.Diagnostics.Process.Start(saveFileDialog1.FileName);
-            }
         }
 
         /// <summary>

@@ -98,7 +98,7 @@ namespace PropPrint
             this.buttonImportImage.TabIndex = 3;
             this.buttonImportImage.Text = "&Import image...";
             this.buttonImportImage.UseVisualStyleBackColor = true;
-            this.buttonImportImage.Click += new System.EventHandler(this.button1_Click);
+            this.buttonImportImage.Click += new System.EventHandler(this.buttonImportImage_Click);
             // 
             // openFileDialog1
             // 
@@ -145,13 +145,14 @@ namespace PropPrint
             // 
             // comboBoxPageFormat
             // 
+            this.comboBoxPageFormat.BackColor = System.Drawing.SystemColors.Window;
             this.comboBoxPageFormat.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.comboBoxPageFormat.FormattingEnabled = true;
             this.comboBoxPageFormat.Location = new System.Drawing.Point(199, 99);
             this.comboBoxPageFormat.Name = "comboBoxPageFormat";
             this.comboBoxPageFormat.Size = new System.Drawing.Size(178, 21);
             this.comboBoxPageFormat.TabIndex = 9;
-            this.comboBoxPageFormat.SelectedIndexChanged += new System.EventHandler(this.comboBoxPageSize_SelectedIndexChanged);
+            this.comboBoxPageFormat.SelectedIndexChanged += new System.EventHandler(this.comboBoxPageFormat_SelectedIndexChanged);
             // 
             // buttonApplySettings
             // 
