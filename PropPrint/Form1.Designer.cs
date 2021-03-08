@@ -331,6 +331,7 @@ namespace PropPrint
             this.textBoxOverlapSides.Name = "textBoxOverlapSides";
             this.textBoxOverlapSides.Size = new System.Drawing.Size(77, 20);
             this.textBoxOverlapSides.TabIndex = 29;
+            this.textBoxOverlapSides.Leave += new System.EventHandler(this.textBoxOverlapSides_Leave);
             // 
             // textBoxMarginSides
             // 

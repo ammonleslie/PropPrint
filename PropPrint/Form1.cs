@@ -33,7 +33,7 @@ namespace PropPrint
         // variables for user input
         UoM selectedUnit;
         PageFormat selectedFormat;
-        double sizeWidth, marginTop, overlap;
+        double sizeWidth, marginTop, overlapTop;
 
         // variables for finer control
         double sizeHeight, marginSides, overlapSides;
@@ -54,6 +54,7 @@ namespace PropPrint
         public const double DEFAULT_OVERLAP = 1;
         public const double MIN_SIZE = 1;
         public const double MIN_MARGIN = 0;
+        public const double MIN_OVERLAP = 0;
 
         public Form1()
         {
@@ -93,10 +94,7 @@ namespace PropPrint
             sizeWidth = DEFAULT_SIZE;
             sizeHeight = DEFAULT_SIZE;
             marginTop = DEFAULT_MARGIN;
-            overlap = DEFAULT_OVERLAP;
-
-           // maintainAspect = true;
-            //sameMargin = true;
+            overlapTop = DEFAULT_OVERLAP;
 
             // set form fields
             comboBoxUoM.SelectedItem = cm;
@@ -104,10 +102,11 @@ namespace PropPrint
             textBoxSizeWidth.Text = sizeWidth.ToString("F2");
             textBoxSizeHeight.Text = sizeHeight.ToString("F2");
             textBoxMarginTop.Text = marginTop.ToString("F2");
-            textBoxOverlapTop.Text = overlap.ToString("F2");
+            textBoxOverlapTop.Text = overlapTop.ToString("F2");
 
             checkBoxMaintainSizeRatio.Checked = true;
             checkBoxMarginAllSides.Checked = true;
+            checkBoxOverlapAllSides.Checked = true;
 
 
         }
@@ -263,17 +262,38 @@ namespace PropPrint
 
             if (sameOverlap)
             {
-                overlapSides = overlap;
+                overlapSides = overlapTop;
                 textBoxOverlapSides.Text = textBoxOverlapTop.Text;
             }
         }
 
         private void textBoxOverlapTop_Leave(object sender, EventArgs e)
         {
+            try
+            {
+                double tempOverlapTop = Convert.ToDouble(textBoxOverlapTop.Text);
+
+                if (tempOverlapTop >= MIN_OVERLAP)
+                {
+                    overlapTop = tempOverlapTop;
+                }
+                else
+                {
+                    MessageBox.Show("Invalid value entered. Please enter a decimal value greater than or equal to " + MIN_OVERLAP + ".");
+                }
+            }
+            catch
+            {
+                MessageBox.Show("Invalid value entered. Please enter a proper decimal value eg. 2, 11.5, 7.0.");
+            }
+
             if (sameOverlap)
             {
-                textBoxOverlapSides.Text = textBoxOverlapTop.Text;
+                overlapSides = overlapTop;
             }
+
+            textBoxOverlapTop.Text = overlapTop.ToString("F2");
+            textBoxOverlapSides.Text = overlapSides.ToString("F2");
         }
 
         private void textBoxSizeHeight_Leave(object sender, EventArgs e)
@@ -352,6 +372,32 @@ namespace PropPrint
             }
 
             textBoxMarginSides.Text = marginSides.ToString("F2");
+        }
+
+        private void textBoxOverlapSides_Leave(object sender, EventArgs e)
+        {
+            if (!sameOverlap)
+            {
+                try
+                {
+                    double tempOverlapSides = Convert.ToDouble(textBoxOverlapSides.Text);
+
+                    if (tempOverlapSides >= MIN_OVERLAP)
+                    {
+                        overlapSides = tempOverlapSides;
+                    }
+                    else
+                    {
+                        MessageBox.Show("Invalid value entered. Please enter a decimal value greater than or equal to " + MIN_OVERLAP + ".");
+                    }
+                }
+                catch
+                {
+                    MessageBox.Show("Invalid value entered. Please enter a proper decimal value eg. 2, 11.5, 7.0.");
+                }
+            }
+
+            textBoxOverlapSides.Text = overlapSides.ToString("F2");
         }
 
         /// <summary>
@@ -476,7 +522,8 @@ namespace PropPrint
                 Image editImageClean = (Image)editImage.Clone();
 
                 // convert overlap to pixels
-                int pixelOverlap = selectedUnit.ToPixels(overlap);
+                int pixelOverlapTop = selectedUnit.ToPixels(overlapTop); 
+                int pixelOverlapSides = selectedUnit.ToPixels(overlapSides);
 
                 // create cutting rectangle at start point
                 Rectangle cutLines = new Rectangle(origin, individualImageSize);
@@ -492,10 +539,10 @@ namespace PropPrint
                 selectedFormat = (PageFormat)comboBoxPageFormat.SelectedItem;
 
                 // for entire height of image
-                for (int y = 0; y < newPixelHeight; y += (individualImageSize.Height - pixelOverlap))
+                for (int y = 0; y < newPixelHeight; y += (individualImageSize.Height - pixelOverlapTop))
                 {
                     // for each width of image
-                    for (int x = 0; x < newPixelWidth; x += (individualImageSize.Width - pixelOverlap))
+                    for (int x = 0; x < newPixelWidth; x += (individualImageSize.Width - pixelOverlapSides))
                     {
                         cutLines.X = x;
 
@@ -544,37 +591,14 @@ namespace PropPrint
 
         private bool GetInputs()
         {
-            string message = "";
-
-            // check text inputs
-            try
-            {
-                //// commenting out as checks are moved to their respective control Leave event
-                // sizeWidth = Convert.ToDouble(textBoxSizeWidth.Text);
-                // marginTop = Convert.ToDouble(textBoxMarginTop.Text);
-                overlap = Convert.ToDouble(textBoxOverlapTop.Text);
-            }
-            catch
-            {
-                message += " - One or more inpuit field is not formatted correctly, please use decimal values eg. 2, 5.5, 12.0 \n";
-            }
-
             // check if image imported
             if (originalImage == null)
             {
-                message += " - No image imported. Please import an image to process";
-            }
-
-            if (message == null || message == "")
-            {
-                return true;
-            }
-
-            else
-            {
-                MessageBox.Show("Please address the following issues: \n\n" + message);
+                MessageBox.Show("Please import an image for processing.");
                 return false;
             }
+
+            return true;
         }
 
         private void comboBoxSizeUnits_SelectedIndexChanged(object sender, EventArgs e)
