@@ -74,7 +74,7 @@ namespace PropPrint
             this.pictureBoxImagePreview.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pictureBoxImagePreview.Location = new System.Drawing.Point(12, 27);
             this.pictureBoxImagePreview.Name = "pictureBoxImagePreview";
-            this.pictureBoxImagePreview.Size = new System.Drawing.Size(444, 387);
+            this.pictureBoxImagePreview.Size = new System.Drawing.Size(624, 387);
             this.pictureBoxImagePreview.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBoxImagePreview.TabIndex = 0;
             this.pictureBoxImagePreview.TabStop = false;
@@ -92,7 +92,7 @@ namespace PropPrint
             // 
             // buttonImportImage
             // 
-            this.buttonImportImage.Location = new System.Drawing.Point(165, 420);
+            this.buttonImportImage.Location = new System.Drawing.Point(276, 420);
             this.buttonImportImage.Name = "buttonImportImage";
             this.buttonImportImage.Size = new System.Drawing.Size(123, 31);
             this.buttonImportImage.TabIndex = 3;
@@ -156,7 +156,7 @@ namespace PropPrint
             // 
             // buttonApplySettings
             // 
-            this.buttonApplySettings.Location = new System.Drawing.Point(313, 694);
+            this.buttonApplySettings.Location = new System.Drawing.Point(493, 694);
             this.buttonApplySettings.Name = "buttonApplySettings";
             this.buttonApplySettings.Size = new System.Drawing.Size(143, 23);
             this.buttonApplySettings.TabIndex = 10;
@@ -218,7 +218,7 @@ namespace PropPrint
             // 
             // buttonExportPDF
             // 
-            this.buttonExportPDF.Location = new System.Drawing.Point(949, 694);
+            this.buttonExportPDF.Location = new System.Drawing.Point(672, 694);
             this.buttonExportPDF.Name = "buttonExportPDF";
             this.buttonExportPDF.Size = new System.Drawing.Size(102, 23);
             this.buttonExportPDF.TabIndex = 18;
@@ -285,7 +285,7 @@ namespace PropPrint
             this.groupBox1.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
             this.groupBox1.Location = new System.Drawing.Point(12, 487);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(672, 201);
+            this.groupBox1.Size = new System.Drawing.Size(624, 201);
             this.groupBox1.TabIndex = 22;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Settings";
@@ -399,7 +399,7 @@ namespace PropPrint
             // 
             this.groupBox2.Controls.Add(this.listViewPrintPreview);
             this.groupBox2.ForeColor = System.Drawing.SystemColors.ControlDarkDark;
-            this.groupBox2.Location = new System.Drawing.Point(949, 13);
+            this.groupBox2.Location = new System.Drawing.Point(672, 13);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(389, 675);
             this.groupBox2.TabIndex = 23;
@@ -410,7 +410,7 @@ namespace PropPrint
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1350, 732);
+            this.ClientSize = new System.Drawing.Size(1076, 732);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.buttonExportPDF);
