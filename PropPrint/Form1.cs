@@ -477,150 +477,33 @@ namespace PropPrint
             // if the user imports an image, store the original and an editing copy
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
+                if (originalImage != null) 
+                { 
+                    // dispose of previous images
+                    originalImage.Dispose();
+                    editImage.Dispose();
+                }
+
                 originalImage = Image.FromFile(openFileDialog1.FileName);
                 editImage = (Image)originalImage.Clone();
+
+                
             }
 
             textBoxSizeHeight.Text = GetSizeHeight().ToString("F2");
-            UpdatePreview();
+            RefreshPreviewImage();
         }
 
         private void buttonApplySettings_Click(object sender, EventArgs e)
         {
             Console.WriteLine("----- START PROCESSING -----");
 
+            
+
             // check inputs are valid
             if (CheckImageImported())
             {
-                int newPixelWidth, newPixelHeight;
-
-                // reset preview images
-                imageListPages.Images.Clear();
-                listViewPrintPreview.Items.Clear();
-
-                // reset generated images
-                generatedPagesList.Clear();
-
-                try
-                {
-                    // convert original pixel dimensions to selected UoM
-                    double currentUnitWidth, currentUnitHeight;
-                    currentUnitWidth = selectedUnit.FromPixels(originalImage.Width);
-                    currentUnitHeight = selectedUnit.FromPixels(originalImage.Height);
-
-                    // calculate scale
-                    double scaleX = sizeWidth / currentUnitWidth;
-                    double scaleY = sizeHeight / currentUnitHeight;
-
-                    // get new pixel dimensions based on scale
-                    newPixelWidth = (int)(originalImage.Width * scaleX);
-                    newPixelHeight = (int)(originalImage.Height * scaleY);
-
-                    // resize original image and save to edit image
-                    editImage = ResizeImage(originalImage, newPixelWidth, newPixelHeight);
-
-                    // refresh preview
-                    UpdatePreview();
-                }
-
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Please enter proper decimal values eg. 5.25, 2.0, 8");
-                    Console.WriteLine("-----------------------------------");
-                    return;
-                }
-
-                // calculate individual page image size
-                Size individualImageSize = CalculatePageImageSize();
-
-                if (individualImageSize.Width <= 0 || individualImageSize.Height <= 0)
-                {
-                    MessageBox.Show("Individual image size calculation failed.");
-                    Console.WriteLine("-----------------------------------");
-                    return;
-                }
-
-                // default start point
-                Point origin = new Point(0, 0);
-
-                // check and convert page format units to selected units
-                double selectedFormatWidth = selectedFormat.Width();
-                double selectedFormatHeight = selectedFormat.Height();
-
-                if (selectedFormat.Units() != selectedUnit)
-                {
-                    if (selectedUnit == cm)
-                    {
-                        selectedFormatWidth = UoM.ConvertInchToCM(selectedFormatWidth);
-                        selectedFormatHeight = UoM.ConvertInchToCM(selectedFormatHeight);
-                    }
-                    else
-                    {
-                        selectedFormatWidth = UoM.ConvertCMtoInch(selectedFormatWidth);
-                        selectedFormatHeight = UoM.ConvertCMtoInch(selectedFormatHeight);
-                    }
-                }
-
-                // save copy of edit image
-                Image editImageClean = (Image)editImage.Clone();
-
-                // convert overlap to pixels
-                int pixelOverlapTop = selectedUnit.ToPixels(overlapTop);
-                int pixelOverlapSides = selectedUnit.ToPixels(overlapSides);
-
-                // create cutting rectangle at start point
-                Rectangle cutLines = new Rectangle(origin, individualImageSize);
-
-                // graphics objects for drawing and cutting
-                Graphics graphics = Graphics.FromImage(editImage);
-                Pen pen = new Pen(Color.Red, 3);
-
-                // get margin size in pixels
-                int marginPixelsTop = selectedUnit.ToPixels(marginTop);
-                int marginPixelsSides = selectedUnit.ToPixels(marginSides);
-
-                selectedFormat = (PageFormat)comboBoxPageFormat.SelectedItem;
-
-                // for entire height of image
-                for (int y = 0; y < newPixelHeight; y += (individualImageSize.Height - pixelOverlapTop))
-                {
-                    // for each width of image
-                    for (int x = 0; x < newPixelWidth; x += (individualImageSize.Width - pixelOverlapSides))
-                    {
-                        cutLines.X = x;
-
-                        cutLines.Y = y;
-
-                        graphics.DrawRectangle(pen, cutLines);
-
-                        // create cutout and move to list
-                        Image cutImage = new Bitmap(selectedUnit.ToPixels(selectedFormatWidth), selectedUnit.ToPixels(selectedFormatHeight));
-
-                        using (Graphics g = Graphics.FromImage(cutImage))
-                        {
-                            g.FillRectangle(Brushes.White, 0, 0, cutImage.Width, cutImage.Height);
-                            g.DrawImage(editImageClean, marginPixelsSides, marginPixelsTop, cutLines, GraphicsUnit.Pixel);
-                        }
-
-                        generatedPagesList.Add(cutImage);
-
-                        // create thumbnail of image
-                        Bitmap thumb = GenerateThumbnail(cutImage);
-                        this.imageListPages.Images.Add(thumb);
-                    }
-                }
-
-                this.listViewPrintPreview.LargeImageList = this.imageListPages;
-
-                for (int j = 0; j < this.imageListPages.Images.Count; j++)
-                {
-                    ListViewItem item = new ListViewItem();
-                    item.ImageIndex = j;
-                    this.listViewPrintPreview.Items.Add(item);
-                }
-
-                UpdatePreview();
-
+                ApplySettings();
             }
 
             else
@@ -664,10 +547,13 @@ namespace PropPrint
                     XImage xImage = XImage.FromStream(strm);
 
                     // draw image onto PDF page
-                    g.DrawImage(xImage, 0, 0, xImage.Width, xImage.Height);
+                    g.DrawImage(xImage, 0, 0, xImage.PixelWidth, xImage.PixelHeight);
 
                     // keep it clean
+                    strm.Flush();
                     strm.Close();
+                    xImage.Dispose();
+                    g.Dispose();
                 }
 
                 // save the file and open
@@ -676,11 +562,14 @@ namespace PropPrint
                     pdf.Save(saveFileDialog1.FileName);
                     System.Diagnostics.Process.Start(saveFileDialog1.FileName);
                 }
+
+                pdf.Dispose();
             }
             else
             {
-                MessageBox.Show("No image has been processed. Please import an image and apply your settings before trying to export to PDF.");
+                MessageBox.Show("No image has been processed. Please import an image and apply your settings before exporting to PDF.");
             }
+
         }
 
         // ####### CUSTOM METHODS #######
@@ -733,7 +622,7 @@ namespace PropPrint
         /// <summary>
         /// Refreshes the image preview to display the most recent version of the editing image
         /// </summary>
-        private void UpdatePreview()
+        private void RefreshPreviewImage()
         {
             pictureBoxImagePreview.Image = editImage;
         }
@@ -848,7 +737,7 @@ namespace PropPrint
         public static Bitmap ResizeImage(Image image, int width, int height)
         {
             Rectangle destRect = new Rectangle(0, 0, width, height);
-            var destImage = new Bitmap(width, height);
+            var destImage = new Bitmap(width, height, image.PixelFormat);
 
             destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
 
@@ -865,12 +754,249 @@ namespace PropPrint
                     wrapMode.SetWrapMode(WrapMode.TileFlipXY);
                     graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
                 }
+
+                graphics.Dispose();
             }
 
             return destImage;
 
         }
 
+        public static Bitmap NewImageResize(Image image, int width, int height)
+        {
+            Bitmap newImage;
+
+            newImage = new Bitmap(width, height);
+
+            using (var graphics = Graphics.FromImage(newImage))
+            {
+                graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+                graphics.DrawImage(image, new Rectangle(0, 0, width, height));
+            }
+
+            return newImage;
+        }
+
+        public void ApplySettings()
+        {
+            // change preview image based on calculated ratio
+            UpdatePreviewRatio();
+
+            // get size of image to be pasted onto page
+            Size pageImageSize = CalculatePageImageSize();
+
+            Console.WriteLine("Calculated image size on page: " + pageImageSize);
+
+            // get scale for edit image to new size
+            double xScale = GetScale(editImage.Width, sizeWidth);
+            double yScale = GetScale(editImage.Height, sizeHeight);
+
+            Console.WriteLine("X scale: " + xScale);
+            Console.WriteLine("Y scale: " + yScale);
+
+            // cut images and resize onto pages
+            GeneratePageImages(pageImageSize, xScale, yScale);
+
+            //// This will fix the tiny memory leak I'm currently trying to find in ApplySettings
+            // GC.Collect();
+
+            
+        }
+
+        private void GeneratePageImages(Size imageSize, double xScale, double yScale)
+        {
+            // clear old lists
+            imageListPages.Images.Clear();
+            pagesList.Clear();
+            listViewPrintPreview.Clear();
+
+            foreach (Image p in generatedPagesList)
+            {
+                p.Dispose();
+            }
+
+            generatedPagesList.Clear();
+
+            // get size for cutting before resizing to page size
+            Size cutImageSize = new Size((int)(imageSize.Width / xScale), (int)(imageSize.Height / xScale));
+
+            Console.WriteLine("Calculated cut size from preview image: " + cutImageSize);
+
+            // get overlap values in pixels to scale
+            int pixelOverlapTop = (int)(selectedUnit.ToPixels(overlapTop) / yScale);
+            int pixelOverlapSides = (int)(selectedUnit.ToPixels(overlapSides) / xScale);
+
+            // get margin values
+            int pixelMarginTop = selectedUnit.ToPixels(marginTop);
+            int pixelMarginSides = selectedUnit.ToPixels(marginSides);
+
+            // check and convert page format units to selected units
+            double selectedFormatWidth = selectedFormat.Width();
+            double selectedFormatHeight = selectedFormat.Height();
+
+            if (selectedFormat.Units() != selectedUnit)
+            {
+                if (selectedUnit == cm)
+                {
+                    selectedFormatWidth = UoM.ConvertInchToCM(selectedFormatWidth);
+                    selectedFormatHeight = UoM.ConvertInchToCM(selectedFormatHeight);
+                }
+                else
+                {
+                    selectedFormatWidth = UoM.ConvertCMtoInch(selectedFormatWidth);
+                    selectedFormatHeight = UoM.ConvertCMtoInch(selectedFormatHeight);
+                }
+            }
+
+            // get graphics of edit image
+            Graphics editGraphics = Graphics.FromImage(editImage);
+
+            // create rectangle for cutting and drawing
+            Rectangle cutRectangle = new Rectangle(0, 0, cutImageSize.Width, cutImageSize.Height);
+
+            // create pen for drawing on preview
+            Pen pen = new Pen(Color.Red, 2);
+
+            // for entire height of image
+            for (int y = 0; y < editImage.Height; y += (cutImageSize.Height - pixelOverlapTop))
+            {
+                // for each width of image
+                for (int x = 0; x < editImage.Width; x += (cutImageSize.Width - pixelOverlapSides))
+                {
+                    cutRectangle.X = x;
+
+                    cutRectangle.Y = y;
+
+                    editGraphics.DrawRectangle(pen, cutRectangle);
+
+                    // get cut out
+                    Image cutout = new Bitmap(cutImageSize.Width, cutImageSize.Height);
+                    using (Graphics g = Graphics.FromImage(cutout))
+                    {
+                        g.DrawImage(editImage, 0, 0, cutRectangle, GraphicsUnit.Pixel);
+
+                        g.Dispose();
+                    }
+
+                    // resize cut out
+                    Image newCutout = ResizeImage(cutout, imageSize.Width, imageSize.Height);
+
+                    // create full page image
+                    Image fullPageImage = new Bitmap(selectedUnit.ToPixels(selectedFormatWidth), selectedUnit.ToPixels(selectedFormatHeight));
+
+                    using (Graphics g = Graphics.FromImage(fullPageImage))
+                    {
+                        // make page white
+                        g.FillRectangle(Brushes.White, 0, 0, fullPageImage.Width, fullPageImage.Height);
+
+                        // draw cutout onto page
+                        g.DrawImage(newCutout, pixelMarginSides, pixelMarginTop);
+
+                        g.Dispose();
+                    }
+
+                    generatedPagesList.Add(fullPageImage);
+
+
+                    // create thumbnail of image
+                    Bitmap thumb = GenerateThumbnail(fullPageImage);
+                    this.imageListPages.Images.Add(thumb);
+
+                    cutout.Dispose();
+                    newCutout.Dispose();
+                    // fullPageImage.Dispose();
+                }
+            }
+
+            this.listViewPrintPreview.LargeImageList = this.imageListPages;
+
+            for (int j = 0; j < this.imageListPages.Images.Count; j++)
+            {
+                ListViewItem item = new ListViewItem();
+                item.ImageIndex = j;
+                this.listViewPrintPreview.Items.Add(item);
+            }
+
+            editGraphics.Dispose();
+        }
+
+        private double GetScale(int imageSize, double newSize)
+        {
+            double scale;
+
+            // get new size in pixels
+            int newSizePixel = selectedUnit.ToPixels(newSize);
+
+            // calculate scale of image size to new size
+            scale = (double)newSizePixel / (double)imageSize;
+
+
+            return scale;
+        }
+
+        /// <summary>
+        /// Resizes the preview image based on the ratios calculated from the user input for size width and height 
+        /// and updates the preview image
+        /// </summary>
+        public void UpdatePreviewRatio()
+        {
+            // get image size
+            int previewWidth = originalImage.Width;
+            int previewHeight = originalImage.Height;
+
+            // IMPORTANT -- Must dispose otherwise high risk of OutOfMemory Exception occuring
+            editImage.Dispose();
+
+            // resize original image to new ratio if ratio not kept
+            if (!maintainAspect)
+            {
+                // get ratios
+                double ratioX = sizeWidth / originalImage.Width;
+                double ratioY = sizeHeight / originalImage.Height;
+
+                Console.WriteLine("X ratio: " + ratioX);
+                Console.WriteLine("Y ratio: " + ratioY);
+
+                double multiplier;
+
+                // get the lesser and use it as the baseline
+                if (ratioX < ratioY)
+                {
+                    multiplier = 1 / ratioX;
+                }
+                else
+                {
+                    multiplier = 1 / ratioY;
+                }
+
+                ratioX *= multiplier;
+                ratioY *= multiplier;
+
+                Console.WriteLine("New X ratio: " + ratioX);
+                Console.WriteLine("New Y ratio: " + ratioY);
+
+                previewWidth = (int)(originalImage.Width * ratioX);
+                previewHeight = (int)(originalImage.Height * ratioY);
+            }
+
+            // if image is too large for resize, scale back down as long as the smallest value is above 10
+            while ((previewWidth > 20000 || previewHeight > 20000) && Math.Min(previewWidth, previewHeight) > 10)
+            {
+                previewWidth /= 2;
+                previewHeight /= 2;
+            }
+
+            // resize image
+            
+            editImage = ResizeImage(originalImage, previewWidth, previewHeight);
+
+            Console.WriteLine("New image size: " + editImage.Size);
+
+            RefreshPreviewImage();
+        }
         
     }
 }
